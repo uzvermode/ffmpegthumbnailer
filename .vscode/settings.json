@@ -5,5 +5,6 @@
     "files.associations": {
         "config.h": "c"
     },
-    "cquery.cacheDirectory": "${workspaceFolder}/.vscode/cquery_cached_index/"
+    "cquery.cacheDirectory": "${workspaceFolder}/.vscode/cquery_cached_index/",
+    "cmake.configureOnOpen": true
 }

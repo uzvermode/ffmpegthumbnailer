@@ -15,18 +15,18 @@
 //    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #include "videothumbnailerc.h"
-#include "videothumbnailer.h"
 #include "filmstripfilter.h"
+#include "videothumbnailer.h"
 
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
 using namespace ffmpegthumbnailer;
 
 struct thumbnailer_data
 {
-    VideoThumbnailer thumbnailer;
-    FilmStripFilter filter;
+    VideoThumbnailer         thumbnailer;
+    FilmStripFilter          filter;
     thumbnailer_log_callback log_cb = nullptr;
 };
 
@@ -42,17 +42,17 @@ extern "C" video_thumbnailer* video_thumbnailer_create(void)
 {
     video_thumbnailer* thumbnailer = new video_thumbnailer_struct();
 
-    thumbnailer->thumbnail_size             = 128;
-    thumbnailer->seek_percentage            = 10;
-    thumbnailer->seek_time                  = nullptr;
-    thumbnailer->overlay_film_strip         = 0;
-    thumbnailer->workaround_bugs            = 0;
-    thumbnailer->thumbnail_image_quality    = 8;
-    thumbnailer->thumbnail_image_type       = Png;
-    thumbnailer->maintain_aspect_ratio      = 1;
-    thumbnailer->prefer_embedded_metadata   = 0;
-    thumbnailer->av_format_context          = nullptr;
-    thumbnailer->tdata                      = new thumbnailer_data();
+    thumbnailer->thumbnail_size           = 128;
+    thumbnailer->seek_percentage          = 10;
+    thumbnailer->seek_time                = nullptr;
+    thumbnailer->overlay_film_strip       = 0;
+    thumbnailer->workaround_bugs          = 0;
+    thumbnailer->thumbnail_image_quality  = 8;
+    thumbnailer->thumbnail_image_type     = Png;
+    thumbnailer->maintain_aspect_ratio    = 1;
+    thumbnailer->prefer_embedded_metadata = 0;
+    thumbnailer->av_format_context        = nullptr;
+    thumbnailer->tdata                    = new thumbnailer_data();
 
     return thumbnailer;
 }
@@ -65,7 +65,7 @@ extern "C" void video_thumbnailer_destroy(video_thumbnailer* thumbnailer)
 
 extern "C" image_data* video_thumbnailer_create_image_data(void)
 {
-    image_data* data        = new image_data();
+    image_data* data = new image_data();
 
     data->image_data_ptr    = 0;
     data->image_data_size   = 0;
@@ -83,9 +83,9 @@ extern "C" void video_thumbnailer_destroy_image_data(image_data* data)
     data->image_data_width  = 0;
     data->image_data_height = 0;
 
-    std::vector<uint8_t>* dataVector = reinterpret_cast<std::vector<uint8_t>* >(data->internal_data);
+    std::vector<uint8_t>* dataVector = reinterpret_cast<std::vector<uint8_t>*>(data->internal_data);
     delete dataVector;
-    data->internal_data     = 0;
+    data->internal_data = 0;
 
     delete data;
 }
@@ -124,13 +124,13 @@ extern "C" int video_thumbnailer_generate_thumbnail_to_buffer(video_thumbnailer*
 {
     try
     {
-        auto dataVector         = reinterpret_cast<std::vector<uint8_t>*>(generated_image_data->internal_data);
-        auto& videoThumbnailer  = thumbnailer->tdata->thumbnailer;
+        auto  dataVector       = reinterpret_cast<std::vector<uint8_t>*>(generated_image_data->internal_data);
+        auto& videoThumbnailer = thumbnailer->tdata->thumbnailer;
         setProperties(thumbnailer);
-        auto info = videoThumbnailer.generateThumbnail(movie_filename, thumbnailer->thumbnail_image_type, *dataVector, thumbnailer->av_format_context);
-        generated_image_data->image_data_ptr = &dataVector->front();
-        generated_image_data->image_data_size = static_cast<int>(dataVector->size());
-        generated_image_data->image_data_width = info.width;
+        auto info                               = videoThumbnailer.generateThumbnail(movie_filename, thumbnailer->thumbnail_image_type, *dataVector, thumbnailer->av_format_context);
+        generated_image_data->image_data_ptr    = &dataVector->front();
+        generated_image_data->image_data_size   = static_cast<int>(dataVector->size());
+        generated_image_data->image_data_width  = info.width;
         generated_image_data->image_data_height = info.height;
         generated_image_data->image_data_source = info.source;
     }
@@ -160,10 +160,29 @@ extern "C" int video_thumbnailer_generate_thumbnail_to_file(video_thumbnailer* t
     return 0;
 }
 
+extern "C" int video_thumbnailer_generate_thumbnail_to_file_custom(const char* movie_filename, const char* output_fileName)
+{
+    video_thumbnailer* thumbnailer = video_thumbnailer_create();
+    try
+    {
+
+        auto& videoThumbnailer = thumbnailer->tdata->thumbnailer;
+        setProperties(thumbnailer);
+        videoThumbnailer.generateThumbnail(movie_filename, thumbnailer->thumbnail_image_type, output_fileName, thumbnailer->av_format_context);
+    }
+    catch (const std::exception& e)
+    {
+        trace_message(thumbnailer, ThumbnailerLogLevelError, e.what());
+        return -1;
+    }
+
+    return 0;
+}
+
 extern "C" void video_thumbnailer_set_log_callback(video_thumbnailer* thumbnailer, thumbnailer_log_callback cb)
 {
     thumbnailer->tdata->log_cb = cb;
-    auto& videoThumbnailer = thumbnailer->tdata->thumbnailer;
+    auto& videoThumbnailer     = thumbnailer->tdata->thumbnailer;
 
     if (!cb)
     {
@@ -171,7 +190,7 @@ extern "C" void video_thumbnailer_set_log_callback(video_thumbnailer* thumbnaile
     }
     else
     {
-        videoThumbnailer.setLogCallback([=] (ThumbnailerLogLevel lvl, const std::string& msg) {
+        videoThumbnailer.setLogCallback([=](ThumbnailerLogLevel lvl, const std::string& msg) {
             cb(lvl, msg.c_str());
         });
     }

@@ -33,7 +33,8 @@
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
-            }
+            },
+            "configurationProvider": "go2sh.cmake-integration"
         },
         {
             "name": "Win32",
